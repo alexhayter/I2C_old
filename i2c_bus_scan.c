@@ -10,22 +10,26 @@ bool reserved_addr(uint8_t addr) {
 int main() {
     stdio_init_all();
 
-    uint sm[8];
+    uint sm[8]={0,0,0,0,0,0,0,0};
     for(uint i=0;i<8;i++){
         PIO pio= i < 4 ? pio0 : pio1;
         sm[i] = pio_claim_unused_sm(pio,true);
     }
 
-    uint offset = pio_add_program(pio0, &i2c_program);
+    uint offset0 = pio_add_program(pio0, &i2c_program);
+    uint offset1 = pio_add_program(pio1, &i2c_program);
 
-    for(uint i=0;i<8;i++){
-        PIO pio= i < 4 ? pio0 : pio1;    
-        i2c_program_init(pio, sm[i], offset, 2*i+2, 2*i+3);
-    }    
+    for(uint i=0;i<4;i++){
+        i2c_program_init(pio0, sm[i], offset0, 2*i+2, 2*i+3);
+    } 
+    
+    for(uint i=4;i<8;i++){ 
+        i2c_program_init(pio1, sm[i], offset1, 2*i+2, 2*i+3);
+    }   
 
     for (int i=0;i<8;i++){
-        PIO pio= i < 4 ? pio0 : pio1;
-        printf("\nPIO I2C SM %i Bus Scan\n",sm[i]);
+        PIO pio = i < 4 ? pio0 : pio1;
+        printf("\nPIO I2C SM %i Bus Scan\n",i);
         printf("   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
 
         for (int addr = 0; addr < (1 << 7); ++addr) {
